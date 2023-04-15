@@ -67,8 +67,10 @@ int main (int argc, char ** argv) {
 - Let's turn it off using CFF Explorer. We need to open our "main.exe" and change the Optional Header value of "DllCharacteristics". DLL can move is ASLR flag and Image is NX compatible is flag to set non-executable stack. We will turn them both off.
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/cff.png?raw=true "CFF Explorer")
 - After made changes, let's run program with OllyDbg again. Now we can see, that addresses on stack are always the same. So we can make a atck snapshot on the start and the end of main function.
-* On my system **(it can changes depending on the running system)** now the ESP points on 0x0019FF2C address **(there is located return address on function that is before main)** before execution of instruction 00401000  /$ 55             PUSH EBP and on 0x0019FF10 **(beginning of our buffer)** before execution of 00401032  |. 8BE5           MOV ESP,EBP. 
+* On my system **(it can changes depending on the running system)** at the beginning of main ESP points on 0x0019FF2C address **(there is located return address on function that is before main)** before execution of instruction 00401000  /$ 55             PUSH EBP and on 0x0019FF10 **(beginning of our buffer)** before execution of 00401032  |. 8BE5           MOV ESP,EBP. 
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/stack.png?raw=true "Stack snapshot")
+
 ## The main idea of bufferoverflow
 - Function gets() doesn't have any information about the buffer size. So it will rewrite stack memory with size of input. It leads to rewriting values that are located directly after buffer. As we noticed directly after buffer on stack are located EBP register backup (result of 00401000  /$ 55             PUSH EBP) and return address. The main idea is to rewrite the value of return address with our address, where we can place our code (placed using this input too).
 ## Exploit
