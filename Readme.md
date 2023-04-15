@@ -31,8 +31,10 @@ int main (int argc, char ** argv) {
 
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/s1.png?raw=true "cmd")
 * If we enter short input, for example: "Kirill", everything is ok. But if we will try to enter some long input, program will crash. We can find out in using Event Viewer **evenvwr** command in cmd.
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/crash.png?raw=true "Event Viewer")
 * To find out the crash cause, let's open our program using debugger OllyDbg. In rigth upper corner we can see values of already explained registers. Let's repeat our input, that caused program's crash, and look into registers values. (F9 - program run)
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/registers.png?raw=true "Registers")
 * As we can see, now in register EBP and EIP are ASCII values of our input's letters. And program tries to jump on invalid adress that causes it's crash. How are these values get into registers? Let's examine stack while executing of main function. Stack is located on right bottom corner.
 * Code of main function is located on the top of all instructions. So let set the breakpoint on adress **00401000**.
@@ -65,6 +67,7 @@ int main (int argc, char ** argv) {
 - After several program runs, we can notice, that the addresses on the stack are always different, that makes our stack analyse more complicated.
 * It's the security concept called ASLR. Address space layout randomization (ASLR) is a technique that is used to increase the difficulty of performing a buffer overflow attack that requires the attacker to know the location of an executable in memory.
 - Let's turn it off using CFF Explorer. We need to open our "main.exe" and change the Optional Header value of "DllCharacteristics". DLL can move is ASLR flag and Image is NX compatible is flag to set non-executable stack. We will turn them both off.
+
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/cff.png?raw=true "CFF Explorer")
 - After made changes, let's run program with OllyDbg again. Now we can see, that addresses on stack are always the same. So we can make a atck snapshot on the start and the end of main function.
 * On my system **(it can changes depending on the running system)** at the beginning of main ESP points on 0x0019FF2C address **(there is located return address on function that is before main)** before execution of instruction 00401000  /$ 55             PUSH EBP and on 0x0019FF10 **(beginning of our buffer)** before execution of 00401032  |. 8BE5           MOV ESP,EBP. 
