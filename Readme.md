@@ -28,7 +28,8 @@ int main (int argc, char ** argv) {
 **/GS-** means to turn off security canaries (special generated random values that are located between function frame and return address on stack). It will make our attack easier.
 ## Analyse of program
 * So now we have executable file "main.exe". Let's examine it properly. 
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\s1.png" "cmd")
+
+![Alt text]("https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/s1.png" "cmd")
 * If we enter short input, for example: "Kirill", everything is ok. But if we will try to enter some long input, program will crash. We can find out in using Event Viewer **evenvwr** command in cmd.
 ![Alt text]("C:\Users\leonokir\Docs\Screenshots\crash.png" "Event Viewer")
 * To find out the crash cause, let's open our program using debugger OllyDbg. In rigth upper corner we can see values of already explained registers. Let's repeat our input, that caused program's crash, and look into registers values. (F9 - program run)
