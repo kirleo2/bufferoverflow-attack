@@ -29,9 +29,9 @@ int main (int argc, char ** argv) {
 ## Analyse of program
 * So now we have executable file "main.exe". Let's examine it properly. 
 
-![Alt text]("https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/s1.png?raw=true" "cmd")
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/s1.png?raw=true "cmd")
 * If we enter short input, for example: "Kirill", everything is ok. But if we will try to enter some long input, program will crash. We can find out in using Event Viewer **evenvwr** command in cmd.
-![Alt text]("https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/crash.png?raw=true" "Event Viewer")
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/crash.png?raw=true "Event Viewer")
 * To find out the crash cause, let's open our program using debugger OllyDbg. In rigth upper corner we can see values of already explained registers. Let's repeat our input, that caused program's crash, and look into registers values. (F9 - program run)
 ![Alt text]("C:\Users\leonokir\Docs\Screenshots\registers.png" "Registers")
 * As we can see, now in register EBP and EIP are ASCII values of our input's letters. And program tries to jump on invalid adress that causes it's crash. How are these values get into registers? Let's examine stack while executing of main function. Stack is located on right bottom corner.
